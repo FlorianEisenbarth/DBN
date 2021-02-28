@@ -61,19 +61,20 @@ def generer_image_DBN(dnn: DNN, gibbs_iter: int, nb_images: int, img_x:int, img_
     
 
 # %%
-
-data = lire_alpha_digit(["A", "B"])
+'''
+data = lire_alpha_digit(["A"])
 data = np.array([i.flatten() for i in np.concatenate(list(data.values()))])
 
 
 p = data.shape[1]
-layers = [[p,100],[100,100],[100,10]]
+layers = [[p,300],[300,100],[100,10]]
 img_x = 16
 img_y = 20
 
 dnn = init_DNN(layers)
 dnn = pretrain_DNN(data, dnn, 1000, 0.01, 10)
 generer_image_DBN(dnn, 1000, 10, img_x, img_y)
+'''
 # %%
 
 # %%

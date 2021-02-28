@@ -65,7 +65,6 @@ def sortie_entree_RBM(H: np.ndarray, rbm: RBM) -> np.ndarray:
 
 def train_RBM(X: np.ndarray,rbm :RBM, epochs: int, lr: float, batch_size: int ) -> RBM:
     err_rec = []
-    label = []
     data = X
     for i in range(1,epochs+1):
         np.random.shuffle(X)
