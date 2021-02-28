@@ -65,6 +65,7 @@ def sortie_entree_RBM(H: np.ndarray, rbm: RBM) -> np.ndarray:
 
 def train_RBM(X: np.ndarray,rbm :RBM, epochs: int, lr: float, batch_size: int ) -> RBM:
     err_rec = []
+    label = []
     data = X
     for i in range(1,epochs+1):
         np.random.shuffle(X)
@@ -89,7 +90,10 @@ def train_RBM(X: np.ndarray,rbm :RBM, epochs: int, lr: float, batch_size: int ) 
         x_recon = sortie_entree_RBM(h, rbm)
         err_rec.append(np.linalg.norm(v0 - x_recon))
         print("Epochs :{}/{} | Erreur de reconstruction:{}".format(i, epochs ,err_rec[-1]))
-    plt.plot(err_rec[::batch_size])
+    plt.plot(err_rec)
+    plt.xlabel("itération")
+    plt.ylabel("RMSE")
+
             
     return rbm, err_rec
 
