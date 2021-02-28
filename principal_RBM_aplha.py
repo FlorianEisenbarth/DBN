@@ -27,6 +27,7 @@ def plot_data(data, nb=10):
         for i in range(0,nb):
             if(len(data.keys())>1):
                 axes[k, i].imshow(data[c][i].astype(float), cmap="gray")
+        
             else:
                 axes[i].imshow(data[c][i].astype(float), cmap="gray")
         k+=1
@@ -63,6 +64,8 @@ def sortie_entree_RBM(H: np.ndarray, rbm: RBM) -> np.ndarray:
 
 
 def train_RBM(X: np.ndarray,rbm :RBM, epochs: int, lr: float, batch_size: int ) -> RBM:
+    err_rec = []
+    data = X
     for i in range(1,epochs+1):
         np.random.shuffle(X)
         for batch in range(0,len(data),batch_size):
@@ -82,12 +85,13 @@ def train_RBM(X: np.ndarray,rbm :RBM, epochs: int, lr: float, batch_size: int ) 
             rbm.a += (lr / t) * da
             rbm.b += (lr / t) * db
             
-            h = entre_sortie_RBM(v0, rbm)
-            x_recon = sortie_entree_RBM(h, rbm)
-            err = np.linalg.norm(v0 - x_recon)
-            print("Epochs :{}/{} | Erreur de reconstruction:{}".format(i, epochs ,err))
+        h = entre_sortie_RBM(v0, rbm)
+        x_recon = sortie_entree_RBM(h, rbm)
+        err_rec.append(np.linalg.norm(v0 - x_recon))
+        print("Epochs :{}/{} | Erreur de reconstruction:{}".format(i, epochs ,err_rec[-1]))
+    plt.plot(err_rec[::batch_size])
             
-    return rbm 
+    return rbm, err_rec
 
 def generer_image_RBM(rbm: RBM, iter_gibbs: int, nb_images: int, img_x: int , img_y: int) -> None:
     images = []
@@ -115,20 +119,18 @@ def generer_image_RBM(rbm: RBM, iter_gibbs: int, nb_images: int, img_x: int , im
     
     
 # %%
-
-data = lire_alpha_digit("A")
+'''
+data = lire_alpha_digit(["A","B"])
 data = np.array([i.flatten() for i in np.concatenate(list(data.values()))])
 
-nb_neuro = 5
+nb_neuro = 100
 p = data.shape[1]
-
 
 rbm = init_RBM(p, nb_neuro)
 phv = entre_sortie_RBM(data, rbm)
 pvh = sortie_entree_RBM(phv,rbm)
-rbm_train = train_RBM(data, rbm, 1000, 0.05, 10)
+rbm_train = train_RBM(data, rbm, 1000, 0.01, 10)
 generer_image_RBM(rbm, 1000, 10, 16, 20)
+'''
 
-
-
-#%%
+# %%
