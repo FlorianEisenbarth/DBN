@@ -69,8 +69,10 @@ def train_RBM(X: np.ndarray,rbm :RBM, epochs: int, lr: float, batch_size: int ) 
     for i in range(1,epochs+1):
         np.random.shuffle(X)
         for batch in range(0,len(data),batch_size):
+            
             v0 = data[batch:min(batch + batch_size, data.shape[0]),:]
             t = v0.shape[0]
+            
             phv0 = entre_sortie_RBM(v0, rbm)
             h0 = (np.random.rand(t, rbm.W.shape[1]) <= phv0).astype(int)
             pvh0 = sortie_entree_RBM(h0, rbm)

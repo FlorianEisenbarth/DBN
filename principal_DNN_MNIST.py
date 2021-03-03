@@ -12,18 +12,20 @@ from sklearn.preprocessing import OneHotEncoder
 def softmax(X: np.ndarray) -> np.ndarray:
     return np.exp(X)/np.sum(np.exp(X), axis=1).reshape(-1,1)
 
+
 def calcul_softmax(data: np.ndarray, rbm: RBM) -> np.ndarray:
     p = data @ rbm.W + rbm.b 
     p = softmax(p)
     return p
 
+
 def entree_sortie_reseau(data: np.ndarray, dnn: DNN) -> np.ndarray:
     sortie = []
-    for i in range(len(dnn.layers)):
+    for i in range(len(dnn.layers)-1):
         a = entre_sortie_RBM(data, dnn.layers[i])
-        b = calcul_softmax(data ,dnn.layers[i])
-        sortie.append((a,b))
         data = a
+        sortie.append(a)
+    sortie.append(calcul_softmax(data ,dnn.layers[-1]))
     
     return sortie
 
@@ -38,34 +40,34 @@ def retropropagation(X: np.ndarray, Y:np.ndarray , dnn: DNN, iter: int, lr: floa
         np.random.shuffle(X)
         for batch in range(0, X.shape[0], batch_size):
             batch_index = indices[batch:min(batch + batch_size, X.shape[0])] 
-            data_batch = X[batch_index]
+            data_batch = X[batch_index,:]
             dnn_copy = deepcopy(dnn)
             
             sortie = entree_sortie_reseau(data_batch, dnn)
             
-            c = sortie[-1][0] - Y[batch_index]
-            d_wp = sortie[-2][0].T @ c
+            c = sortie[-1] - Y[batch_index]
+            d_wp = sortie[-2].T @ c
             d_bp = c.sum(0)
-            dnn_copy.layers[-1].W += (lr/data_batch.shape[0]) * d_wp
-            dnn_copy.layers[-1].b += (lr/data_batch.shape[0]) * d_bp
+            dnn_copy.layers[-1].W -= (lr/data_batch.shape[0]) * d_wp
+            dnn_copy.layers[-1].b -= (lr/data_batch.shape[0]) * d_bp
             
             for j in range(len(dnn.layers)-2,-1,-1):
                 if(j == 0):
-                    x = (data_batch,)
+                    x = data_batch
                 else:
                     x = sortie[j-1]
-                
-                c_mul = sortie[j][0] * ( 1 - sortie[j][0])
+
+                c_mul = sortie[j] * ( 1 - sortie[j])
                 c = (c @ dnn.layers[j+1].W.T) * c_mul
-                d_wp = x[0].T @ c 
+                d_wp = x.T @ c 
                 d_bp = c.sum(0)
-                dnn_copy.layers[j].W += (lr/data_batch.shape[0]) * d_wp
-                dnn_copy.layers[j].b += (lr/data_batch.shape[0]) * d_bp
+                dnn_copy.layers[j].W -= (lr/data_batch.shape[0]) * d_wp
+                dnn_copy.layers[j].b -= (lr/data_batch.shape[0]) * d_bp
         
             dnn = deepcopy(dnn_copy)
     
         sortie = entree_sortie_reseau(X, dnn)
-        erreur = - (np.log10(sortie[-1][0]) * (Y==1)*1).sum()
+        erreur = - (np.log10(sortie[-1]) * (Y==1)*1).sum()
         cross_entropy.append(erreur)
         print("Epochs :{}/{} | cross-entropy:{}".format(i, iter ,cross_entropy[-1]))
     
@@ -91,18 +93,23 @@ def test_DNN(X_test, Y_test, dnn):
 
 X_train = np.array([i.flatten() for i in X_train]) 
 X_test = np.array([i.flatten() for i in X_test])
+
+X_train = np.array([(i/256>0.5).astype('int') for i in X_train])[0:10000]
+
+
 ohe = OneHotEncoder()
-Y_train_one = ohe.fit_transform(Y_train.reshape(-1,1)).toarray()
+
+Y_train_one = ohe.fit_transform(Y_train.reshape(-1,1)).toarray()[0:10000]
 Y_test_one = ohe.fit_transform(Y_test.reshape(-1,1)).toarray()
 
 p = X_train.shape[1]
-layers = [[p,300],[300,100],[100,10]]
+layers = [(p, 300), (300, 200), (200, 10)]
 img_x = 16
 img_y = 20
 
 dnn = init_DNN(layers)
 #dnn = pretrain_DNN(X_train, dnn, 1000, 0.01, 10)
-dnn = retropropagation(X_train, Y_train_one, dnn, 10, 0.01, 10)
+dnn = retropropagation(X_train, Y_train_one, dnn, 250, 0.16, 75)
 
 
 # %%
