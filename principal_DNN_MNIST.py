@@ -1,4 +1,5 @@
 #%%
+from matplotlib import pyplot as plt
 from numpy.core.numeric import cross
 from principal_DBN_alpha import *
 from principal_RBM_aplha import *
@@ -37,7 +38,6 @@ def retropropagation(X: np.ndarray, Y:np.ndarray , dnn: DNN, iter: int, lr: floa
     np.random.shuffle(indices)
     
     for i in range(1, iter+1):
-        np.random.shuffle(X)
         for batch in range(0, X.shape[0], batch_size):
             batch_index = indices[batch:min(batch + batch_size, X.shape[0])] 
             data_batch = X[batch_index,:]
@@ -67,7 +67,7 @@ def retropropagation(X: np.ndarray, Y:np.ndarray , dnn: DNN, iter: int, lr: floa
             dnn = deepcopy(dnn_copy)
     
         sortie = entree_sortie_reseau(X, dnn)
-        erreur = - (np.log10(sortie[-1]) * (Y==1)*1).sum()
+        erreur = - (np.log10(sortie[-1]) * (Y==1)).sum()
         cross_entropy.append(erreur)
         print("Epochs :{}/{} | cross-entropy:{}".format(i, iter ,cross_entropy[-1]))
     
@@ -82,8 +82,9 @@ def retropropagation(X: np.ndarray, Y:np.ndarray , dnn: DNN, iter: int, lr: floa
 
 def test_DNN(X_test, Y_test, dnn):
     pred = entree_sortie_reseau(X_test,dnn)
-    erreur = - (np.log10(pred[-1][0]) * (Y_test==1)*1).sum()
-    print("Categorical-cross-entropy:{}".format(erreur))
+    pred = pred[-1].argmax(axis=1)
+    acc = (( pred == Y_test).astype(int).sum(axis=0)) / len(X_test)
+    print("Test Accuracy:{} %".format(acc * 100))
     
                 
         
@@ -91,16 +92,16 @@ def test_DNN(X_test, Y_test, dnn):
 
 (X_train, Y_train), (X_test, Y_test) = mnist.load_data()
 
-X_train = np.array([i.flatten() for i in X_train]) 
-X_test = np.array([i.flatten() for i in X_test])
+X_train_flatten = np.array([i.flatten() for i in X_train]) 
+X_test_flatten = np.array([i.flatten() for i in X_test])
 
-X_train = np.array([(i/256>0.5).astype('int') for i in X_train])[0:10000]
-
+X_train_flatten = np.array([(i/256>0.5).astype('int') for i in X_train])[0:10000]
+X_test_flatten = np.array([(i/256>0.5).astype('int') for i in X_test])[0:10000]
 
 ohe = OneHotEncoder()
 
 Y_train_one = ohe.fit_transform(Y_train.reshape(-1,1)).toarray()[0:10000]
-Y_test_one = ohe.fit_transform(Y_test.reshape(-1,1)).toarray()
+Y_test_one = ohe.fit_transform(Y_test.reshape(-1,1)).toarray()[0:10000]
 
 p = X_train.shape[1]
 layers = [(p, 300), (300, 200), (200, 10)]
@@ -108,8 +109,19 @@ img_x = 16
 img_y = 20
 
 dnn = init_DNN(layers)
-#dnn = pretrain_DNN(X_train, dnn, 1000, 0.01, 10)
-dnn = retropropagation(X_train, Y_train_one, dnn, 250, 0.16, 75)
+dnn = retropropagation(X_train, Y_train_one, dnn, 250, 0.5, 75)
+test_DNN(X_test, Y_test_one, dnn)
 
 
+
+# %%
+
+
+X_test_unflatten = X_test.reshape(-1, 28, 28)
+
+pred = entree_sortie_reseau(X_test[:10],dnn)
+for i in range(10):
+    plt.subplots()
+    plt.imshow(X_test_unflatten[i])
+    plt.title("prediction:{}" .format(pred[-1][i].argmax()))
 # %%
