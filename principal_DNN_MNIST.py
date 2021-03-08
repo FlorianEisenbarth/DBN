@@ -95,22 +95,21 @@ def test_DNN(X_test, Y_test, dnn):
 X_train_flatten = np.array([i.flatten() for i in X_train]) 
 X_test_flatten = np.array([i.flatten() for i in X_test])
 
-X_train_flatten = np.array([(i/256>0.5).astype('int') for i in X_train])[0:10000]
-X_test_flatten = np.array([(i/256>0.5).astype('int') for i in X_test])[0:10000]
+X_train_flatten = np.array([(i/256>0.5).astype('int') for i in X_train_flatten])[0:10000]
+X_test_flatten = np.array([(i/256>0.5).astype('int') for i in X_test_flatten])[0:10000]
 
 ohe = OneHotEncoder()
 
 Y_train_one = ohe.fit_transform(Y_train.reshape(-1,1)).toarray()[0:10000]
 Y_test_one = ohe.fit_transform(Y_test.reshape(-1,1)).toarray()[0:10000]
 
-p = X_train.shape[1]
+p = X_train_flatten.shape[1]
 layers = [(p, 300), (300, 200), (200, 10)]
-img_x = 16
-img_y = 20
+
 
 dnn = init_DNN(layers)
-dnn = retropropagation(X_train, Y_train_one, dnn, 250, 0.5, 75)
-test_DNN(X_test, Y_test_one, dnn)
+dnn = retropropagation(X_train_flatten, Y_train_one, dnn, 250, 0.5, 75)
+test_DNN(X_test_flatten, Y_test, dnn)
 
 
 
