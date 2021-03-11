@@ -89,7 +89,7 @@ def test_DNN(X_test, Y_test, dnn):
                 
         
 # %%
-
+'''
 (X_train, Y_train), (X_test, Y_test) = mnist.load_data()
 
 X_train_flatten = np.array([i.flatten() for i in X_train]) 
@@ -124,3 +124,4 @@ for i in range(10):
     plt.imshow(X_test_unflatten[i])
     plt.title("prediction:{}" .format(pred[-1][i].argmax()))
 # %%
+'''

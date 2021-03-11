@@ -72,9 +72,8 @@ img_x = 16
 img_y = 20
 
 dnn = init_DNN(layers)
-dnn = pretrain_DNN(data, dnn, 1000, 0.01, 10)
+dnn = pretrain_DNN(data, dnn, 1500, 0.01, 10)
 generer_image_DBN(dnn, 1000, 10, img_x, img_y)
 '''
-# %%
 
 # %%
