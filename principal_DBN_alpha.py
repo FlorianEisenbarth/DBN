@@ -10,9 +10,9 @@ from math import ceil
 import matplotlib.pyplot as plt 
 
 class DNN:
-    def __init__(self,layers, layers_in_out) -> None:
+    def __init__(self,layers) -> None:
         self.layers = layers
-        self.layers_in_out = layers_in_out       
+              
         
 
 def init_DNN(layers) -> DNN:
@@ -20,15 +20,29 @@ def init_DNN(layers) -> DNN:
     for i in range(0,len(layers)):
         dbn.append(init_RBM(layers[i][0], layers[i][1]))
     
-    return DNN(dbn, layers)
+    return DNN(dbn)
 
 def pretrain_DNN(X: np.ndarray, dnn: DNN, epochs: int, lr: float, batch_size: int ) -> DNN:
     
     for i in range(len(dnn.layers)):
-        t, _ = train_RBM(X, dnn.layers[i], epochs, lr, batch_size)
-        X = entre_sortie_RBM(X,dnn.layers[i])
+        t, _ = train_RBM(X, dnn.layers[i], epochs, lr, batch_size, i)
         dnn.layers[i] = t
+        X = entre_sortie_RBM(X,dnn.layers[i])
+        
+        
     return dnn
+
+def pretrain_DNN_2(X: np.ndarray, dnn: DNN, epochs: int, lr: float, batch_size: int ) -> DNN:
+    pretrain_dnn = []
+    for i in range(len(dnn.layers)):
+        t, _ = train_RBM(X, dnn.layers[i], epochs, lr, batch_size, i)
+        pretrain_dnn.append(t)
+        X = entre_sortie_RBM(X,t)
+        print(t.W)
+        
+    return DNN(pretrain_dnn)
+
+
 
 def generer_image_DBN(dnn: DNN, gibbs_iter: int, nb_images: int, img_x:int, img_y: int) -> None:
     images = []
@@ -62,17 +76,17 @@ def generer_image_DBN(dnn: DNN, gibbs_iter: int, nb_images: int, img_x:int, img_
 
 # %%
 '''
-data = lire_alpha_digit(["A"])
+data = lire_alpha_digit(["F"])
 data = np.array([i.flatten() for i in np.concatenate(list(data.values()))])
 
 
 p = data.shape[1]
-layers = [[p,300],[300,100],[100,10]]
+layers = [[p,500],[500,300],[300,10]]
 img_x = 16
 img_y = 20
 
 dnn = init_DNN(layers)
-dnn = pretrain_DNN(data, dnn, 1500, 0.01, 10)
+dnn = pretrain_DNN(data, dnn, 250, 0.01, 10)
 generer_image_DBN(dnn, 1000, 10, img_x, img_y)
 '''
 

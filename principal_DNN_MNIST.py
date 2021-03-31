@@ -30,7 +30,6 @@ def entree_sortie_reseau(data: np.ndarray, dnn: DNN) -> np.ndarray:
     
     return sortie
 
-
 def retropropagation(X: np.ndarray, Y:np.ndarray , dnn: DNN, iter: int, lr: float, batch_size: int, ) -> DNN:
     
     cross_entropy = []
@@ -108,7 +107,10 @@ layers = [(p, 300), (300, 200), (200, 10)]
 
 
 dnn = init_DNN(layers)
-dnn = retropropagation(X_train_flatten, Y_train_one, dnn, 250, 0.5, 75)
+print(dnn.layers[0].W)
+pretrain_dnn = pretrain_DNN_2(X_train_flatten, dnn, 100, 0.5,70)
+#%%
+dnn = retropropagation(X_train_flatten, Y_train_one, pretrain_dnn, 250, 0.5, 75)
 test_DNN(X_test_flatten, Y_test, dnn)
 
 
