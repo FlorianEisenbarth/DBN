@@ -69,3 +69,26 @@ err1 = 1 - (( pred1 == Y_test).astype(int).sum(axis=0) / len(X_test))
 print("Taux d'erreur de classification Dnn1(pre entraine):{} %".format(err1 *100))
 #print("Taux d'erreur de classification Dnn1(pre entraine):{} %".format(err2 *100))
 
+couches = range(1,6)
+cross_entropy_pretrain = [23.55, 11.21, 6.00, 4.38, 2.89]
+cross_entropy_nonpretrain = [13.93, 3.34, 1.49, 0.87, 0.57]
+err_pretrain = [ 3.49, 2.73, 2.28, 2.05, 1.96 ]
+err_nonpretrain = [2.20, 2.15, 2.54, 2.52, 3.06]
+
+plt.figure()
+plt.plot(couches,cross_entropy_pretrain, label="pretrain")
+plt.plot(couches, cross_entropy_nonpretrain, label="non pretrain")
+plt.legend()
+plt.title("Evolution de l'entropie croisé en fonction du nombres de couches cachées ")
+plt.xlabel("couches cachées ")
+plt.xticks(range(1,6))
+plt.ylabel("Entropie croisé")
+
+plt.figure()
+plt.plot(couches,err_pretrain, label="pretrain")
+plt.plot(couches,err_nonpretrain, label="non pretrain")
+plt.legend()
+plt.title("Evolution de l'erreur en fonction du nombres de couches cachées")
+plt.xlabel("couches cachées ")
+plt.xticks(range(1,6))
+plt.ylabel("erreur (%)")
